@@ -243,7 +243,7 @@ fn gen_string_literal(value: &str) -> String {
         let mut tokens = r##"r#""##.to_string();
 
         for b in value.as_bytes() {
-            tokens.push_str(&format!("\\x{:x}", b));
+            tokens.push_str(&format!("\\x{:02x}", b));
         }
 
         tokens.push_str(r##""#"##);
