@@ -231,8 +231,23 @@ pub fn gen_constant_type_value(value: &ConstantValue) -> TokenStream {
         ConstantValue::I64(value) => quote! { i64 = #value },
         ConstantValue::F32(value) => quote! { f32 = #value },
         ConstantValue::F64(value) => quote! { f64 = #value },
-        ConstantValue::String(value) => quote! { &'static str = #value },
+        ConstantValue::String(value) => format!("&'static str = {}", gen_string_literal(value)).into(),
         _ => unimplemented!(),
+    }
+}
+
+fn gen_string_literal(value: &str) -> String {
+    if value.is_ascii() && !value.contains('\\') {
+        format!(r#""{}""#, value)
+    } else {
+        let mut tokens = r##"r#""##.to_string();
+
+        for b in value.as_bytes() {
+            tokens.push_str(&format!("\\x{:x}", b));
+        }
+
+        tokens.push_str(r##""#"##);
+        tokens
     }
 }
 
@@ -275,7 +290,7 @@ pub fn gen_constant_value(value: &ConstantValue) -> TokenStream {
         ConstantValue::I64(value) => quote! { #value },
         ConstantValue::F32(value) => quote! { #value },
         ConstantValue::F64(value) => quote! { #value },
-        ConstantValue::String(value) => quote! { #value },
+        ConstantValue::String(value) => gen_string_literal(value).into(),
         _ => unimplemented!(),
     }
 }
